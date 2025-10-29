@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Balanced Diet Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green-900: #1b5e20;
+            --green-700: #2e7d32;
+            --green-500: #66bb6a;
+            --green-300: #a5d6a7;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            background: linear-gradient(180deg, var(--green-700), #247a2e 80%);
+            color: var(--white);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+            overflow-y: scroll;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            padding: 26px;
+            border-radius: 12px;
+            margin-bottom: 26px;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08);
+            transform-origin: center;
+            opacity: 0;
+            /* will fade in */
+            transform: translateY(16px) scale(0.995);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1)
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 6px
+        }
+
+        header h1 {
+            margin: 8px 0;
+            font-size: 28px;
+            color: var(--green-300);
+            text-shadow: 0 2px 0 rgba(0, 0, 0, 0.12)
+        }
+
+        header p {
+            margin: 0;
+            font-size: 14px;
+            opacity: .95
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 18px;
+            margin-top: 16px
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            padding: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform .18s ease, box-shadow .18s ease;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .card:active {
+            transform: scale(.98)
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 0 rgba(0, 0, 0, 0.12)
+        }
+
+        .card .emoji {
+            font-size: 36px;
+            margin-bottom: 8px;
+            display: block
+        }
+
+        ul.tips {
+            padding-left: 18px;
+            margin: 8px 0 0 0;
+            font-size: 14px
+        }
+
+        /* popup */
+        #popup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 40%;
+            transform: translate(-50%, -50%);
+            background: var(--green-900);
+            padding: 18px;
+            border-radius: 10px;
+            border: 3px solid var(--green-500);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+            max-width: 360px;
+            width: 90%;
+            z-index: 60;
+            text-align: left;
+        }
+
+        #popup h3 {
+            margin: 0;
+            color: var(--green-300);
+            font-size: 16px
+        }
+
+        #popup p {
+            margin: 10px 0 0 0;
+            font-size: 13px;
+            line-height: 1.4
+        }
+
+        #popup .controls {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px
+        }
+
+        .btn {
+            background: var(--green-500);
+            color: var(--green-900);
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        /* mini facts (below main popup) */
+        #mini {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: calc(40% + 210px);
+            transform: translateX(-50%);
+            width: 340px;
+            max-width: 90%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            padding: 12px;
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 13px;
+            z-index: 65;
+            text-align: left
+        }
+
+        /* music button */
+        .music-btn {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--green-300);
+            color: var(--green-900);
+            border: 3px solid var(--white);
+            cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+            z-index: 80
+        }
+
+        .music-btn:active {
+            transform: translateY(2px)
+        }
+
+        /* small responsive tweaks */
+        @media (max-width:480px) {
+            header h1 {
+                font-size: 20px
+            }
+
+            .card {
+                padding: 14px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1>Balanced Diet Guide</h1>
+            <p>Simple, practical guidance about balanced eating — click any food group for details.</p>
+        </header>
+
+        <section class="section" id="what">
+            <h2 style="margin:0 0 8px 0;color:var(--green-300)">What is a Balanced Diet?</h2>
+            <p style="margin:0;font-size:15px;line-height:1.5;">A balanced diet supplies the nutrients and energy your
+                body needs for daily activities, growth, and repair. It includes appropriate portions from different
+                food groups: grains, fruits, vegetables, proteins, dairy, and healthy fats.</p>
+        </section>
+
+        <section class="section" id="groups">
+            <h2 style="margin:0 0 8px 0;color:var(--green-300)">Food Groups</h2>
+            <div class="grid">
+                <div class="card" data-type="grains"
+                    onclick="openPopup('Grains','Grains provide carbohydrates, the body\'s main source of energy. Choose whole grains such as brown rice, oats, and whole wheat to increase fiber intake.')">
+                    <span class="emoji">🍞</span>
+                    <strong>Grains</strong>
+                </div>
+
+                <div class="card" data-type="fruits"
+                    onclick="openPopup('Fruits','Fruits are rich in vitamins, minerals, and fiber. Fresh fruits are preferable to processed fruit products.')">
+                    <span class="emoji">🍎</span>
+                    <strong>Fruits</strong>
+                </div>
+
+                <div class="card" data-type="vegetables"
+                    onclick="openPopup('Vegetables','Vegetables supply essential vitamins, minerals, and dietary fiber. Include a variety of colors to cover a broad nutrient range.')">
+                    <span class="emoji">🥦</span>
+                    <strong>Vegetables</strong>
+                </div>
+
+                <div class="card" data-type="protein"
+                    onclick="openPopup('Protein','Proteins are necessary for growth and tissue repair. Good sources include lean meats, fish, eggs, legumes, and nuts.')">
+                    <span class="emoji">🍗</span>
+                    <strong>Proteins</strong>
+                </div>
+
+                <div class="card" data-type="dairy"
+                    onclick="openPopup('Dairy','Dairy products provide calcium and vitamin D, important for bone health. Use low-fat options when available.')">
+                    <span class="emoji">🥛</span>
+                    <strong>Dairy</strong>
+                </div>
+
+                <div class="card" data-type="fats"
+                    onclick="openPopup('Fats','Healthy fats are important for energy and vitamin absorption. Prefer sources like olive oil, avocado, and nuts, and limit saturated fats.')">
+                    <span class="emoji">🥑</span>
+                    <strong>Healthy Fats</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="tips">
+            <h2 style="margin:0 0 8px 0;color:var(--green-300)">Practical Tips</h2>
+            <ul class="tips">
+                <li>• Vary your meals so you get nutrients from many sources.</li>
+                <li>• Drink water throughout the day and limit sugary beverages.</li>
+                <li>• Prefer whole foods over highly processed options.</li>
+                <li>• Keep portion sizes reasonable and include vegetables on your plate.</li>
+            </ul>
+        </section>
+
+
+    </main>
+
+    <!-- main popup -->
+    <div id="popup" role="dialog" aria-hidden="true">
+        <h3 id="popup-title">Title</h3>
+        <p id="popup-body">Body text</p>
+        <div class="controls">
+            <button class="btn" id="more-btn">More Facts</button>
+            <button class="btn" onclick="closeMain()">Close</button>
+        </div>
+    </div>
+
+    <!-- mini facts below popup -->
+    <div id="mini" aria-hidden="true"></div>
+
+    <!-- music button: plays short 8-bit melody once when clicked -->
+    <div class="music-btn" id="music-btn" title="Play pixel tune">🎵</div>
+
+    <script>
+        // Fade-in on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+        // Popup logic + rotating practical facts for each group
+        const info = {
+            grains: {
+                title: 'Grains',
+                text: "Grains provide carbohydrates, the body's main source of energy. Choose whole grains such as brown rice, oats, and whole wheat to increase fiber intake.",
+                facts: [
+                    'Swap white rice for brown rice to increase fiber and keep you fuller.',
+                    'Choose whole-grain bread instead of white to help steady blood sugar.',
+                    'Rolled oats are a quick whole-grain breakfast that pairs well with fruit.'
+                ]
+            },
+            fruits: {
+                title: 'Fruits',
+                text: "Fruits are rich in vitamins, minerals, and fiber. Fresh fruits are preferable to processed fruit products.",
+                facts: [
+                    'Eating a whole fruit provides fiber that fruit juice often lacks.',
+                    'Add fruit to yogurt or cereal to improve taste and nutrients.',
+                    'Seasonal fruits are usually fresher and more nutritious.'
+                ]
+            },
+            vegetables: {
+                title: 'Vegetables',
+                text: "Vegetables supply essential vitamins, minerals, and dietary fiber. Include a variety of colors to cover a broad nutrient range.",
+                facts: [
+                    'Aim to fill half your plate with vegetables at lunch and dinner.',
+                    'Roasting vegetables brings out natural sweetness and is easy to prepare.',
+                    'Leafy greens like spinach and kale are nutrient-dense and versatile.'
+                ]
+            },
+            protein: {
+                title: 'Proteins',
+                text: "Proteins are necessary for growth and tissue repair. Good sources include lean meats, fish, eggs, legumes, and nuts.",
+                facts: [
+                    'Combine beans with rice for a full amino-acid profile in plant-based meals.',
+                    'Grilled or baked lean protein is healthier than fried options.',
+                    'Nuts and seeds are good snacks that provide protein and healthy fats.'
+                ]
+            },
+            dairy: {
+                title: 'Dairy',
+                text: "Dairy products provide calcium and vitamin D, important for bone health. Use low-fat options when available.",
+                facts: [
+                    'Choose low-fat milk or yogurt to reduce saturated fat intake.',
+                    'Fortified plant milks can be a good alternative for calcium and vitamin D.',
+                    'Yogurt with live cultures supports gut health.'
+                ]
+            },
+            fats: {
+                title: 'Healthy Fats',
+                text: "Healthy fats are important for energy and vitamin absorption. Prefer sources like olive oil, avocado, and nuts, and limit saturated fats.",
+                facts: [
+                    'Use olive oil for cooking or dressings instead of butter.',
+                    'Avocado adds creamy texture and healthy monounsaturated fats.',
+                    'Nuts can be part of a healthy snack but watch portion sizes.'
+                ]
+            }
+        };
+
+        let currentType = null;
+        let factIndex = 0;
+
+        function openPopup(typeTitle, typeText) {
+            // find key from title
+            const key = Object.keys(info).find(k => info[k].title.toLowerCase() === typeTitle.toLowerCase());
+            currentType = key || typeTitle.toLowerCase();
+            factIndex = 0;
+            document.getElementById('popup-title').textContent = typeTitle;
+            document.getElementById('popup-body').textContent = typeText;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popup').setAttribute('aria-hidden', 'false');
+
+            // hide mini if open
+            closeMini();
+        }
+        function closeMain() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('popup').setAttribute('aria-hidden', 'true');
+            closeMini();
+        }
+
+        function showMore() {
+            if (!currentType || !info[currentType]) return;
+            const arr = info[currentType].facts;
+            const text = arr[factIndex % arr.length];
+            factIndex++;
+            const mini = document.getElementById('mini');
+            mini.textContent = text;
+            mini.style.display = 'block';
+            mini.setAttribute('aria-hidden', 'false');
+
+            // position mini: below popup
+            const popup = document.getElementById('popup');
+            const rect = popup.getBoundingClientRect();
+            const top = rect.bottom + window.scrollY + 10; // 10px below
+            mini.style.top = top + 'px';
+            mini.style.left = (rect.left + rect.width / 2 - mini.offsetWidth / 2) + 'px';
+
+            // auto-hide after 6s
+            clearTimeout(mini._hide); mini._hide = setTimeout(() => { closeMini() }, 6000);
+        }
+        function closeMini() {
+            const mini = document.getElementById('mini');
+            mini.style.display = 'none';
+            mini.setAttribute('aria-hidden', 'true');
+        }
+
+        document.getElementById('more-btn').addEventListener('click', showMore);
+
+        // Close popups when clicking outside
+        window.addEventListener('click', (e) => {
+            const popup = document.getElementById('popup');
+            if (popup.style.display === 'block') {
+                const rect = popup.getBoundingClientRect();
+                if (!(e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom)) {
+                    // clicked outside popup
+                    closeMain();
+                }
+            }
+        });
+
+        // Accessible escape to close
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMain(); });
+
+        // MUSIC: play a short 8-bit style melody once when button clicked using WebAudio API
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        function playPixelMelody() {
+            if (!AudioCtx) return; // not supported
+            if (!audioCtx) audioCtx = new AudioCtx();
+
+            // simple square-wave melody notes (frequencies in Hz)
+            const notes = [880, 880, 0, 880, 0, 698, 880, 0, 1047]; // little melody (0 = pause)
+            const duration = 0.18; // seconds per note
+            let time = audioCtx.currentTime + 0.05;
+            notes.forEach((n, i) => {
+                if (n > 0) {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.type = 'square';
+                    o.frequency.setValueAtTime(n, time);
+                    g.gain.setValueAtTime(0, time);
+                    g.gain.linearRampToValueAtTime(0.16, time + 0.01);
+                    g.gain.exponentialRampToValueAtTime(0.001, time + duration);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(time); o.stop(time + duration + 0.02);
+                }
+                time += duration;
+            });
+        }
+
+        document.getElementById('music-btn').addEventListener('click', () => {
+            // play once per click
+            try { playPixelMelody(); } catch (e) { console.warn('audio error', e) }
+        });
+
+        // ensure mini reposition on resize/scroll
+        window.addEventListener('resize', () => { if (document.getElementById('mini').style.display === 'block') showMore(); });
+        window.addEventListener('scroll', () => { if (document.getElementById('mini').style.display === 'block') showMore(); });
+
+        // initial visibility for any sections already in view
+        document.querySelectorAll('.section').forEach(s => { if (s.getBoundingClientRect().top < window.innerHeight) s.classList.add('visible') });
+    </script>
+    <footer>
+        <p>Created by Maria – Class 6-B</p>
+    </footer>
+
+    <body>
+        <!-- Your website content here -->
+
+        <!-- Popup -->
+        <div id="popup"
+            style="display:block; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:2rem; z-index:1000;">
+            Welcome to the site!
+            <br>
+            <button onclick="document.getElementById('popup').style.display='none'">Close</button>
+        </div>
+    </body>
+
+</body>
+
+</html>
